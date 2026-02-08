@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=heartrate
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U user -d heartrate" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: api
+      # dockerfile: api/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://user:pass@db:5432/heartrate
+      - SECRET_API_KEY=super-secret-key
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  simulator:
+    build:
+      context: simulator
+      # dockerfile: simulator/Dockerfile
+    environment:
+      - API_URL=http://api:8000/heart-rate
+      - API_KEY=super-secret-key
+    depends_on:
+      api:
+        condition: service_started
+
+  dashboard:
+    build:
+      context: dashboard
+      # dockerfile: dashboard/Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8000
+    ports:
+      - "3000:80"
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  postgres_data:
