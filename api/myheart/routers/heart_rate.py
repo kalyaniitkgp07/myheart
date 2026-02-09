@@ -4,7 +4,7 @@ from typing import List
 from datetime import datetime
 from pydantic import BaseModel
 from ..database import HeartRateRecord
-from ..dependencies import get_session, get_api_key
+from ..dependencies import get_session, get_user
 from ..process import classify_heart_rate
 
 router = APIRouter(
@@ -30,11 +30,12 @@ async def get_heart_rates(
 async def ingest_heart_rate(
     data: HeartRateIn,
     session: Session = Depends(get_session),
-    api_key: str = Depends(get_api_key)
+    user: User = Depends(get_user)
 ):
     status_label = classify_heart_rate(data.heart_rate)
     
     record = HeartRateRecord(
+        user_id=user.id,
         heart_rate=data.heart_rate,
         status=status_label,
         timestamp=datetime.utcnow()
