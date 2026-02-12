@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, View, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { Heart, ShieldAlert, Activity } from 'lucide-react-native';
 
-const API_URL = process.env.API_URL;
+const API_URL = process.env.API_URL || 'http://ec2-18-116-97-70.us-east-2.compute.amazonaws.com:8000';
 
 export default function App() {
   const [record, setRecord] = useState(null);

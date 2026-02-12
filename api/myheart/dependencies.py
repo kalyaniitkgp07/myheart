@@ -1,3 +1,4 @@
+from async_lru import alru_cache
 from fastapi import Security, HTTPException, status
 from fastapi.security.api_key import APIKeyHeader
 from sqlmodel import Session, select
@@ -23,6 +24,8 @@ DUMMY_KEY_TO_USER_ID = {
     "super-secret-key": 1,
 }
 
+
+@alru_cache()
 async def get_user(api_key_header: str = Security(api_key_header)):
     session = Session(engine)
     user_id = DUMMY_KEY_TO_USER_ID.get(api_key_header)
